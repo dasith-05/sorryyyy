@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Friends Again</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Outfit:wght@300;400;500;600&display=swap">
+<style>
+/* Layout: one centered question over a drifting-hearts night sky. Yes swells, No runs away. Yes reveals a typed letter. */
+:root {
+  --night: #17081a;
+  --plum: #2c1230;
+  --rose: #ff5d8f;
+  --coral: #ff8a6b;
+  --blush: #ffd9e4;
+  --gold: #f2c28b;
+  --muted: #c9a6bb;
+  --ink: #2a0a1c;
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  box-sizing: border-box;
+  min-height: 100%;
+  overflow-x: hidden;
+  background:
+    radial-gradient(70rem 40rem at 50% -10%, #4a1a4a 0%, transparent 60%),
+    radial-gradient(50rem 30rem at 90% 110%, #5a1633 0%, transparent 60%),
+    var(--night);
+  color: var(--blush);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-block: 24px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.stage {
+  position: relative; z-index: 1;
+  min-height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+.ask { display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-width: 36rem; width: 100%; }
+.eyebrow { margin: 0; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+h1, h2 {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 600;
+  line-height: 1.02; margin: 0; text-wrap: balance;
+}
+h1 { font-size: clamp(2.6rem, 10vw, 4.6rem); }
+h2 { font-size: clamp(2.2rem, 8vw, 3.4rem); }
+.sub { margin: 0; color: var(--muted); font-size: 1.05rem; max-width: 28rem; text-wrap: balance; }
+.sub b { color: var(--blush); font-weight: 500; }
+.heart-mark { width: 3.2rem; height: 3.2rem; fill: var(--rose); filter: drop-shadow(0 0 18px rgba(255,93,143,.65)); animation: beat 1.4s ease-in-out infinite; }
+
+.actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem 1.25rem; margin-top: .75rem; }
+.yes {
+  font: 600 1.25rem/1 var(--font-body);
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--rose), var(--coral));
+  border: 0; border-radius: 999px;
+  padding: .75em 1.7em;
+  cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: .4em;
+  box-shadow: 0 0 0 0 rgba(255,93,143,.5), 0 10px 30px rgba(255,93,143,.35);
+  transition: font-size .45s cubic-bezier(.2,1.4,.4,1), transform .15s;
+  animation: glow 1.8s ease-out infinite;
+}
+.yes svg { width: .9em; height: .9em; fill: currentColor; }
+.yes:hover { transform: scale(1.03); }
+.yes:focus-visible, .no:focus-visible, .plan:focus-visible, .hug:focus-visible, .again:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.stage.huge .yes {
+  position: fixed; inset: 0; z-index: 3;
+  border-radius: 0; width: auto; height: auto;
+  font-size: clamp(3.5rem, 20vw, 10rem);
+  animation: none;
+}
+.slot { display: inline-block; }
+.no {
+  font: 400 .95rem/1 var(--font-body);
+  color: var(--blush);
+  background: rgba(23, 8, 26, .55);
+  border: 1px solid rgba(255,217,228,.4);
+  border-radius: 999px;
+  padding: .8em 1.4em;
+  cursor: pointer; white-space: nowrap;
+  transition: left .4s cubic-bezier(.2,1.2,.3,1), top .4s cubic-bezier(.2,1.2,.3,1), font-size .3s;
+}
+.no.away { position: fixed; z-index: 6; margin: 0; }
+.say { margin: 0; min-height: 3.2em; font-family: var(--font-display); font-style: italic; font-size: 1.35rem; color: var(--blush); max-width: 26rem; text-wrap: balance; position: relative; z-index: 4; }
+.escaped { margin: 0; font-size: .8rem; color: var(--muted); letter-spacing: .04em; min-height: 1.2em; position: relative; z-index: 4; }
+.stage.huge .say, .stage.huge .escaped { color: var(--ink); }
+.stage.huge .say { position: fixed; left: 0; right: 0; bottom: calc(3.2rem + env(safe-area-inset-bottom, 0px)); padding-inline: 1rem; margin-inline: auto; }
+.stage.huge .escaped { position: fixed; left: 0; right: 0; bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px)); }
+
+.reply { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; max-width: 34rem; width: 100%; padding-block: 1rem 2rem; }
+.letter {
+  margin: 0; text-align: left; white-space: pre-wrap;
+  font-family: var(--font-display); font-size: 1.4rem; line-height: 1.5;
+  background: rgba(44, 18, 48, .72);
+  border: 1px solid rgba(255,217,228,.18);
+  border-radius: 1.2rem; padding: 1.5rem 1.4rem; width: 100%; box-sizing: border-box;
+  cursor: pointer;
+}
+.rest { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; width: 100%; animation: fade .9s ease both; }
+.sign { font-family: var(--font-display); font-style: italic; font-size: 1.5rem; color: var(--gold); margin: 0; }
+.promises { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .75rem; width: 100%; text-align: left; }
+.promises li { display: flex; gap: .75rem; align-items: flex-start; }
+.promises svg { flex: none; width: 1rem; height: 1rem; margin-top: .35rem; fill: var(--rose); }
+.plan-head { margin: 0; font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.plans { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; }
+.plan, .hug, .again {
+  font: 500 .95rem/1.2 var(--font-body); color: var(--blush);
+  background: transparent; border: 1px solid rgba(255,217,228,.4);
+  border-radius: 999px; padding: .7em 1.2em; cursor: pointer;
+}
+.plan[aria-pressed="true"] { background: var(--blush); color: var(--ink); border-color: var(--blush); }
+.hug { background: linear-gradient(135deg, var(--rose), var(--coral)); color: var(--ink); border: 0; font-weight: 600; }
+.again { border: 0; color: var(--muted); text-decoration: underline; padding: .4em; }
+.note { margin: 0; color: var(--muted); min-height: 1.6em; }
+.small { font-size: .85rem; color: var(--muted); margin: 0; }
+
+@keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.16); } 30% { transform: scale(1); } 45% { transform: scale(1.1); } }
+@keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(255,93,143,.55), 0 10px 30px rgba(255,93,143,.35); } 100% { box-shadow: 0 0 0 26px rgba(255,93,143,0), 0 10px 30px rgba(255,93,143,.35); } }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .heart-mark, .yes { animation: none; }
+  .no, .yes { transition: none; }
+  .rest { animation: none; }
+}
+
+[hidden] { display: none !important; }
+body { margin: 0; }
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="heart" viewBox="0 0 24 22"><path d="M12 21.2C5.2 15.6 1 11.9 1 7.3 1 4 3.5 1.6 6.6 1.6c2 0 3.9 1 5.4 3 1.5-2 3.4-3 5.4-3C20.5 1.6 23 4 23 7.3c0 4.6-4.2 8.3-11 13.9z"/></symbol>
+</svg>
+
+<div class="stage" id="stage">
+  <section class="ask" id="ask">
+    <svg class="heart-mark" viewBox="0 0 24 22" aria-hidden="true"><use href="#heart"/></svg>
+    <p class="eyebrow">A small question</p>
+    <h1>Can we be friends again?</h1>
+    <p class="sub">Please, <b id="her">love</b>. I'm sorry, and I miss talking to you.</p>
+    <div class="actions">
+      <button class="yes" id="yes" type="button">Yes <svg viewBox="0 0 24 22" aria-hidden="true"><use href="#heart"/></svg></button>
+      <span class="slot" id="slot"><button class="no" id="no" type="button">No</button></span>
+    </div>
+    <p class="say" id="say" aria-live="polite">Take your time. I'll wait.</p>
+    <p class="escaped" id="escaped"></p>
+  </section>
+
+  <section class="reply" id="reply" hidden>
+    <svg class="heart-mark" viewBox="0 0 24 22" aria-hidden="true"><use href="#heart"/></svg>
+    <h2>Thank you, <span id="her2">love</span></h2>
+    <p class="small" id="escapedFinal"></p>
+    <p class="letter" id="letter" title="Tap to skip the typing"></p>
+    <div class="rest" id="rest" hidden>
+      <p class="sign" id="sign"></p>
+      <ul class="promises" id="promises"></ul>
+      <p class="plan-head">Pick how I make it up to you</p>
+      <div class="plans" id="plans" role="group" aria-label="Make-up plan"></div>
+      <p class="note" id="planNote" aria-live="polite"></p>
+      <button class="hug" id="hug" type="button">Send a hug</button>
+      <p class="small" id="hugCount"></p>
+      <button class="again" id="again" type="button">Start over</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---- Edit these before you send the link ---- */
+const CONFIG = {
+  her: "Manika",            // her name or nickname (Rashmi Shelomi)
+  me: "Dasith",
+  date: "15 November 2026",
+  letter:
+    "Manika,\n\n" +
+    "I'm sorry for the bad words I said to you. You didn't deserve to be spoken to like that, and I know it hurt you. I have no excuse, and I won't try to make one.\n\n" +
+    "I was upset, but being upset never gives me the right to disrespect you. You are the last person who should hear words like that from me.\n\n" +
+    "Thank you for giving me another chance.",
+  promises: [
+    "I will never use bad words with you again.",
+    "I'll take a breath before I speak when I'm upset.",
+    "I'll listen first, and say sorry properly."
+  ],
+  plans: ["A long walk and ice cream", "Movie night, your pick", "Dinner, my treat", "Just talking, no phones"]
+};
+
+const $ = (id) => document.getElementById(id);
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const stage = $("stage"), yesBtn = $("yes"), noBtn = $("no"), slot = $("slot");
+
+$("her").textContent = CONFIG.her;
+$("her2").textContent = CONFIG.her;
+
+/* ---- Runaway No, growing Yes ---- */
+const NO_LABELS = ["No", "Wait, no?", "Are you sure?", "Please?", "Think again", "Too slow", "Not allowed", "Almost", "Pretty please", "Okay, yes?"];
+const SAYINGS = [
+  "Hm. That button seems shy.",
+  "It moved. I swear I didn't touch it.",
+  "I'm really, truly sorry.",
+  "Look how big Yes is getting.",
+  "Yes is trying its best.",
+  "I'll bring your favorite snack.",
+  "I miss your laugh.",
+  "Yes is almost the whole screen.",
+  "Okay, it's basically unavoidable now.",
+  "Just tap anywhere. It all says yes."
+];
+const HUGE_AT = 9;
+let tries = 0, last = 0, detached = false;
+
+function placeNo(from) {
+  const w = noBtn.offsetWidth, h = noBtn.offsetHeight, m = 12;
+  const maxX = Math.max(m, innerWidth - w - m), maxY = Math.max(m, innerHeight - h - m);
+  const yr = stage.classList.contains("huge") ? null : yesBtn.getBoundingClientRect();
+  const far = Math.min(200, innerWidth / 2.5);
+  let pick = { x: m, y: m };
+  for (let i = 0; i < 40; i++) {
+    const x = m + Math.random() * (maxX - m), y = m + Math.random() * (maxY - m);
+    pick = { x, y };
+    let ok = true;
+    if (from && Math.hypot(x + w / 2 - from.x, y + h / 2 - from.y) < far) ok = false;
+    if (yr && x < yr.right + 10 && x + w > yr.left - 10 && y < yr.bottom + 10 && y + h > yr.top - 10) ok = false;
+    if (ok) break;
+  }
+  noBtn.style.left = pick.x + "px";
+  noBtn.style.top = pick.y + "px";
+}
+
+function dodge(from) {
+  tries++;
+  if (!detached) {
+    const r = noBtn.getBoundingClientRect();
+    slot.style.width = r.width + "px";
+    slot.style.height = r.height + "px";
+    noBtn.classList.add("away");
+    noBtn.style.left = r.left + "px";
+    noBtn.style.top = r.top + "px";
+    detached = true;
+    void noBtn.offsetWidth;
+  }
+  noBtn.textContent = NO_LABELS[tries % NO_LABELS.length];
+  noBtn.style.fontSize = Math.max(0.6, 0.95 - tries * 0.03) + "rem";
+  yesBtn.style.fontSize = Math.min(5.5, 1.25 + tries * 0.34) + "rem";
+  if (tries >= HUGE_AT) stage.classList.add("huge");
+  $("say").textContent = SAYINGS[Math.min(tries - 1, SAYINGS.length - 1)];
+  $("escaped").textContent = tries === 1 ? "The No button has escaped once." : "The No button has escaped " + tries + " times.";
+  placeNo(from);
+}
+
+function trigger(e) {
+  if (e.cancelable) e.preventDefault();
+  e.stopPropagation();
+  const now = performance.now();
+  if (now - last < 320) return;
+  last = now;
+  const p = e.touches && e.touches[0] ? e.touches[0] : e;
+  dodge(typeof p.clientX === "number" && (p.clientX || p.clientY) ? { x: p.clientX, y: p.clientY } : null);
+}
+["pointerenter", "pointerdown", "touchstart", "click", "focus"].forEach((t) => noBtn.addEventListener(t, trigger, { passive: false }));
+addEventListener("resize", () => { if (detached) placeNo(null); });
+
+/* ---- Hearts in the sky ---- */
+const cv = $("sky"), ctx = cv.getContext("2d");
+const COLORS = ["#ff5d8f", "#ff8fb1", "#ffd9e4", "#f2c28b", "#e23b74"];
+let W = 0, H = 0, dpr = 1, parts = [], raf = 0;
+
+function size() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function heartPath(x, y, s) {
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.35);
+  ctx.bezierCurveTo(x - s, y - s * 0.3, x - s * 0.55, y - s * 1.05, x, y - s * 0.45);
+  ctx.bezierCurveTo(x + s * 0.55, y - s * 1.05, x + s, y - s * 0.3, x, y + s * 0.35);
+  ctx.fill();
+}
+function bgHeart(anywhere) {
+  return {
+    x: Math.random() * W, y: anywhere ? Math.random() * H : H + 30,
+    vx: (Math.random() - 0.5) * 0.25, vy: -(0.25 + Math.random() * 0.55),
+    s: 5 + Math.random() * 12, a: 0.12 + Math.random() * 0.28,
+    c: COLORS[(Math.random() * COLORS.length) | 0], sway: Math.random() * 6.28, bg: true
+  };
+}
+function burst(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.6, sp = 3 + Math.random() * 7;
+    parts.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, s: 6 + Math.random() * 12, a: 1,
+      c: COLORS[(Math.random() * COLORS.length) | 0], life: 90 + Math.random() * 60, max: 150 });
+  }
+  if (!reduce && !raf) loop();
+}
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    if (p.bg) {
+      p.sway += 0.01; p.x += p.vx + Math.sin(p.sway) * 0.3; p.y += p.vy;
+      if (p.y < -30) parts[i] = bgHeart(false);
+      ctx.globalAlpha = p.a;
+    } else {
+      p.vy += 0.12; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.life--;
+      if (p.life <= 0) { parts.splice(i, 1); continue; }
+      ctx.globalAlpha = Math.min(1, p.life / 40);
+    }
+    ctx.fillStyle = p.c;
+    heartPath(p.x, p.y, p.s);
+  }
+  ctx.globalAlpha = 1;
+  raf = requestAnimationFrame(loop);
+}
+size();
+addEventListener("resize", size);
+for (let i = 0; i < 26; i++) parts.push(bgHeart(true));
+if (reduce) {
+  ctx.clearRect(0, 0, W, H);
+  parts.forEach((p) => { ctx.globalAlpha = p.a; ctx.fillStyle = p.c; heartPath(p.x, p.y, p.s); });
+} else {
+  loop();
+}
+
+/* ---- The yes ---- */
+let typer = 0;
+function showRest() {
+  clearTimeout(typer);
+  $("letter").textContent = CONFIG.letter;
+  $("rest").hidden = false;
+}
+function typeLetter() {
+  const el = $("letter"), text = CONFIG.letter;
+  if (reduce) { showRest(); return; }
+  let i = 0;
+  el.textContent = "";
+  (function tick() {
+    i += 2;
+    el.textContent = text.slice(0, i);
+    if (i < text.length) typer = setTimeout(tick, 26); else showRest();
+  })();
+}
+function yay() {
+  stage.classList.remove("huge");
+  $("ask").hidden = true;
+  $("reply").hidden = false;
+  $("escapedFinal").textContent = tries === 0
+    ? "You didn't even try the No button. Thank you."
+    : "You chased the No button " + tries + (tries === 1 ? " time." : " times.") + " I love the effort.";
+  $("sign").textContent = "With love, " + CONFIG.me + " · " + CONFIG.date;
+  const ul = $("promises");
+  ul.innerHTML = "";
+  CONFIG.promises.forEach((t) => {
+    const li = document.createElement("li");
+    li.innerHTML = '<svg viewBox="0 0 24 22" aria-hidden="true"><use href="#heart"/></svg>';
+    const s = document.createElement("span"); s.textContent = t; li.appendChild(s); ul.appendChild(li);
+  });
+  const plans = $("plans");
+  plans.innerHTML = "";
+  CONFIG.plans.forEach((t) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "plan"; b.textContent = t; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => {
+      plans.querySelectorAll(".plan").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      $("planNote").textContent = "Locked in: " + t.toLowerCase() + ". Screenshot this so I can't forget.";
+      burst(innerWidth / 2, innerHeight * 0.7, 40);
+    });
+    plans.appendChild(b);
+  });
+  scrollTo(0, 0);
+  burst(innerWidth / 2, innerHeight * 0.55, 170);
+  setTimeout(() => burst(innerWidth * 0.25, innerHeight * 0.6, 60), 250);
+  setTimeout(() => burst(innerWidth * 0.75, innerHeight * 0.6, 60), 450);
+  typeLetter();
+}
+yesBtn.addEventListener("click", yay);
+$("letter").addEventListener("click", showRest);
+
+let hugs = 0;
+$("hug").addEventListener("click", (e) => {
+  hugs++;
+  $("hugCount").textContent = hugs === 1 ? "1 hug sent." : hugs + " hugs sent.";
+  burst(e.clientX || innerWidth / 2, e.clientY || innerHeight / 2, 28);
+});
+$("again").addEventListener("click", () => location.reload());
+</script>
+
+</body>
+</html>
